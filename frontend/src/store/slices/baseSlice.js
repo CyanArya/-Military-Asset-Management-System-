@@ -1,17 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL;
+import axiosInstance from '../../utils/axios';
 
 // Async thunks
 export const fetchBases = createAsyncThunk(
   'bases/fetchAll',
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const { token } = getState().auth;
-      const response = await axios.get(`${API_URL}/bases`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axiosInstance.get('/bases');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -21,12 +16,9 @@ export const fetchBases = createAsyncThunk(
 
 export const createBase = createAsyncThunk(
   'bases/create',
-  async (baseData, { getState, rejectWithValue }) => {
+  async (baseData, { rejectWithValue }) => {
     try {
-      const { token } = getState().auth;
-      const response = await axios.post(`${API_URL}/bases`, baseData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axiosInstance.post('/bases', baseData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -36,12 +28,9 @@ export const createBase = createAsyncThunk(
 
 export const updateBase = createAsyncThunk(
   'bases/update',
-  async ({ id, baseData }, { getState, rejectWithValue }) => {
+  async ({ id, baseData }, { rejectWithValue }) => {
     try {
-      const { token } = getState().auth;
-      const response = await axios.put(`${API_URL}/bases/${id}`, baseData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axiosInstance.put(`/bases/${id}`, baseData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -51,12 +40,9 @@ export const updateBase = createAsyncThunk(
 
 export const deleteBase = createAsyncThunk(
   'bases/delete',
-  async (id, { getState, rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
-      const { token } = getState().auth;
-      await axios.delete(`${API_URL}/bases/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axiosInstance.delete(`/bases/${id}`);
       return id;
     } catch (error) {
       return rejectWithValue(error.response.data);

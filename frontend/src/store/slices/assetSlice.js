@@ -1,17 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axiosInstance from '../../utils/axios';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 // Async thunks
 export const fetchAssets = createAsyncThunk(
   'assets/fetchAll',
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const { token } = getState().auth;
-      const response = await axios.get(`${API_URL}/assets`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axiosInstance.get('/assets');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -21,12 +18,9 @@ export const fetchAssets = createAsyncThunk(
 
 export const createAsset = createAsyncThunk(
   'assets/create',
-  async (assetData, { getState, rejectWithValue }) => {
+  async (assetData, { rejectWithValue }) => {
     try {
-      const { token } = getState().auth;
-      const response = await axios.post(`${API_URL}/assets`, assetData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axiosInstance.post('/assets', assetData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -36,12 +30,9 @@ export const createAsset = createAsyncThunk(
 
 export const updateAsset = createAsyncThunk(
   'assets/update',
-  async ({ id, assetData }, { getState, rejectWithValue }) => {
+  async ({ id, assetData }, { rejectWithValue }) => {
     try {
-      const { token } = getState().auth;
-      const response = await axios.put(`${API_URL}/assets/${id}`, assetData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axiosInstance.put(`/assets/${id}`, assetData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -51,12 +42,9 @@ export const updateAsset = createAsyncThunk(
 
 export const deleteAsset = createAsyncThunk(
   'assets/delete',
-  async (id, { getState, rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
-      const { token } = getState().auth;
-      await axios.delete(`${API_URL}/assets/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axiosInstance.delete(`/assets/${id}`);
       return id;
     } catch (error) {
       return rejectWithValue(error.response.data);

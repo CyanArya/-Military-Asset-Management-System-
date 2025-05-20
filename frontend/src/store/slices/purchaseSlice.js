@@ -1,17 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axiosInstance from '../../utils/axios';
 
 const API_URL = process.env.REACT_APP_API_URL;
 
 // Async thunks
 export const fetchPurchases = createAsyncThunk(
   'purchases/fetchAll',
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const { token } = getState().auth;
-      const response = await axios.get(`${API_URL}/purchases`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axiosInstance.get('/purchases');
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -21,12 +18,9 @@ export const fetchPurchases = createAsyncThunk(
 
 export const createPurchase = createAsyncThunk(
   'purchases/create',
-  async (purchaseData, { getState, rejectWithValue }) => {
+  async (purchaseData, { rejectWithValue }) => {
     try {
-      const { token } = getState().auth;
-      const response = await axios.post(`${API_URL}/purchases`, purchaseData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axiosInstance.post('/purchases', purchaseData);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -39,7 +33,7 @@ export const updatePurchase = createAsyncThunk(
   async ({ id, purchaseData }, { getState, rejectWithValue }) => {
     try {
       const { token } = getState().auth;
-      const response = await axios.put(`${API_URL}/purchases/${id}`, purchaseData, {
+      const response = await axiosInstance.put(`/purchases/${id}`, purchaseData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
@@ -51,12 +45,9 @@ export const updatePurchase = createAsyncThunk(
 
 export const approvePurchase = createAsyncThunk(
   'purchases/approve',
-  async (id, { getState, rejectWithValue }) => {
+  async (id, { rejectWithValue }) => {
     try {
-      const { token } = getState().auth;
-      const response = await axios.put(`${API_URL}/purchases/${id}/approve`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axiosInstance.put(`/purchases/${id}/approve`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
@@ -69,7 +60,7 @@ export const rejectPurchase = createAsyncThunk(
   async (id, { getState, rejectWithValue }) => {
     try {
       const { token } = getState().auth;
-      const response = await axios.put(`${API_URL}/purchases/${id}/reject`, {}, {
+      const response = await axiosInstance.put(`/purchases/${id}/reject`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       return response.data;
