@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  BASE_COMMANDER
+  LOGISTICS_OFFICER
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ASSIGNED
+  EXPENDED
+  IN_TRANSIT
+}
+
+enum AssetType {
+  VEHICLE
+  WEAPON
+  AMMUNITION
+  OTHER
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  firstName     String
+  lastName      String
+  role          UserRole
+  baseId        String?
+  base          Base?     @relation(fields: [baseId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  assignedAssets Asset[]  @relation("AssignedTo")
+}
+
+model Base {
+  id            String    @id @default(uuid())
+  name          String    @unique
+  location      String
+  users         User[]
+  assets        Asset[]
+  transfersOut  Transfer[] @relation("SourceBase")
+  transfersIn   Transfer[] @relation("DestinationBase")
+  purchases     Purchase[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Asset {
+  id            String    @id @default(uuid())
+  serialNumber  String    @unique
+  type          AssetType
+  name          String
+  description   String?
+  status        AssetStatus
+  baseId        String
+  base          Base      @relation(fields: [baseId], references: [id])
+  assignedToId  String?
+  assignedTo    User?     @relation("AssignedTo", fields: [assignedToId], references: [id])
+  purchaseId    String?
+  purchase      Purchase? @relation(fields: [purchaseId], references: [id])
+  transfers     Transfer[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Purchase {
+  id            String    @id @default(uuid())
+  date          DateTime
+  quantity      Int
+  unitPrice     Float
+  totalAmount   Float
+  baseId        String
+  base          Base      @relation(fields: [baseId], references: [id])
+  assets        Asset[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Transfer {
+  id            String    @id @default(uuid())
+  assetId       String
+  asset         Asset     @relation(fields: [assetId], references: [id])
+  sourceBaseId  String
+  sourceBase    Base      @relation("SourceBase", fields: [sourceBaseId], references: [id])
+  destBaseId    String
+  destBase      Base      @relation("DestinationBase", fields: [destBaseId], references: [id])
+  status        String
+  transferDate  DateTime
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model AuditLog {
+  id            String    @id @default(uuid())
+  action        String
+  entityType    String
+  entityId      String
+  userId        String
+  details       Json
+  createdAt     DateTime  @default(now())
+}
